@@ -7,6 +7,15 @@ public class MyCarController : MonoBehaviour
     private bool onGround = false;
 
     public float jumpForce = 7f;
+    private AudioSource moveAudioSource;
+
+    [SerializeField] private AudioClip moveSound; // 인스펙터에서 할당
+    [SerializeField] private float minSpeed = 0f;
+    [SerializeField] private float maxSpeed = 20f;
+    [SerializeField] private float minVolume = 0.1f;
+    [SerializeField] private float maxVolume = 1f;
+
+
 
     // 왼쪽과 오른쪽 회전 토크를 따로 선언 (인스펙터에서 조정 가능)
     public float leftRotationTorque = 5f;
@@ -15,7 +24,12 @@ public class MyCarController : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        moveAudioSource = gameObject.AddComponent<AudioSource>();
+        moveAudioSource.clip = moveSound;
+        moveAudioSource.loop = true;
+        moveAudioSource.playOnAwake = false;
     }
+
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -70,6 +84,8 @@ public class MyCarController : MonoBehaviour
         }
 
         UIManager.Instance.UpdateCarSpeedText($"Car Speed : {rb.linearVelocity.magnitude:F1}");
+
+        HandleMoveSound();
     }
 
     private void Jump()
@@ -77,4 +93,32 @@ public class MyCarController : MonoBehaviour
         onGround = false;
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
     }
+
+    private void HandleMoveSound()
+    {
+        float speed = rb.linearVelocity.magnitude;
+        bool isMoving = speed > 0.5f;
+
+        if (onGround && isMoving)
+        {
+            if (!moveAudioSource.isPlaying)
+            {
+                moveAudioSource.Play();
+            }
+
+            // 속도에 따라 볼륨 조절
+            float t = Mathf.InverseLerp(minSpeed, maxSpeed, speed); // 0 ~ 1 사이로 정규화
+            float volume = Mathf.Lerp(minVolume, maxVolume, t);     // 정규화된 t를 볼륨 범위에 매핑
+            moveAudioSource.volume = volume;
+        }
+        else
+        {
+            if (moveAudioSource.isPlaying)
+            {
+                moveAudioSource.Pause();
+            }
+        }
+    }
+
+
 }
