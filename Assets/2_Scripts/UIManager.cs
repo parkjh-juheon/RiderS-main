@@ -17,7 +17,6 @@ public class UIManager : MonoBehaviour
     public GameObject nextPanel;     // 새로 열릴 패널
     public Button overButton;        // Over 버튼
 
-
     void Awake()
     {
         if (Instance == null)

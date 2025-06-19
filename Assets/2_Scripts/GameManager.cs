@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using System.Collections; // 코루틴 사용을 위해 필요
 
 public class GameManager : MonoBehaviour
 {
@@ -26,6 +26,18 @@ public class GameManager : MonoBehaviour
         elapsedTime += Time.deltaTime;
 
         UIManager.Instance.UpdateTimeText(FormatElapsedTime(elapsedTime));
+    }
+
+    // 1초 지연 후 GameStop 실행
+    public void GameStopDelayed(float delaySeconds = 1f)
+    {
+        StartCoroutine(GameStopCoroutine(delaySeconds));
+    }
+
+    private IEnumerator GameStopCoroutine(float delaySeconds)
+    {
+        yield return new WaitForSeconds(delaySeconds);
+        GameStop();
     }
 
     public void GameStop()
